@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Business Analytics Dashboard
+
+A real-time financial analysis web application built with Next.js. It replaces manual spreadsheet workflows with an interactive dashboard that instantly recalculates results as you type.
+
+## Features
+
+### NPV Analysis (`/`)
+- Input an initial investment and cash flows for each year
+- Calculates **Net Present Value (NPV)** and **Profitability Index (PI)**
+- Displays a payback schedule chart showing cumulative cash flow over time
+- Color-coded result cards — green for profitable, red for unprofitable projects
+- Add or remove years dynamically
+
+### Sales Forecast (`/sales`)
+- Input historical monthly sales figures
+- Uses **Ordinary Least Squares (OLS) linear regression** to project future sales
+- Set a custom forecast horizon (number of months ahead)
+- Combined bar + trend line chart showing actual vs. forecasted values
+- Cards showing the projected end-of-forecast value and expected growth rate
+
+## Tech Stack
+
+| Tool | Version |
+|---|---|
+| Next.js | 16 |
+| React | 19 |
+| TypeScript | 5 |
+| Tailwind CSS | 4 |
+| Recharts | 3 |
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/
+├── layout.tsx        # Root layout with navigation bar
+├── page.tsx          # NPV Analysis page
+├── sales/
+│   └── page.tsx      # Sales Forecast page
+└── about/
+    └── page.tsx      # About page
+utils/
+├── finance.ts        # NPV, PI, and payback chart calculations
+└── forecast.ts       # OLS linear regression logic
+```
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev     # Start development server
+npm run build   # Build for production
+npm run start   # Start production server
+npm run lint    # Run ESLint
+```

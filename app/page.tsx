@@ -1,65 +1,137 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useMemo } from 'react';
+import { analyzeProject } from '../utils/finance';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 export default function Home() {
+  const [rateInput, setRateInput] = useState<string>('10');
+  
+  const [flows, setFlows] = useState<string[]>(['-100000', '30000', '40000', '50000', '20000']);
+
+  const handleFlowChange = (index: number, value: string) => {
+    const newFlows = [...flows];
+    newFlows[index] = value;
+    setFlows(newFlows);
+  };
+
+  const addYear = () => setFlows([...flows, '0']);
+  
+
+  const removeYear = () => {
+    if (flows.length > 1) {
+      setFlows(flows.slice(0, -1));
+    }
+  };
+
+  const results = useMemo(() => {
+    const rate = parseFloat(rateInput) / 100;
+    
+    const numericFlows = flows.map(f => parseFloat(f) || 0);
+    
+    if (numericFlows.length === 0 || isNaN(rate)) return null;
+    return analyzeProject(rate, numericFlows);
+  }, [rateInput, flows]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="p-8">
+      <div className="max-w-5xl mx-auto space-y-6">
+        
+        <header>
+          <h1 className="text-3xl font-bold text-gray-900">Investment Analysis</h1>
+          <p className="text-gray-500">Assessment of profitability and payback periods</p>
+        </header>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+          
+          {/* Ставка */}
+          <div className="w-1/3">
+            <label className="block text-sm font-bold text-gray-700 mb-1">Discount rate (%)</label>
+            <input 
+              type="number" 
+              value={rateInput}
+              onChange={(e) => setRateInput(e.target.value)}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* Динамические поля денежных потоков */}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <label className="block text-sm font-bold text-gray-700">Cash flows by year</label>
+              <div className="flex gap-2">
+                <button 
+                  onClick={removeYear}
+                  className="px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors text-sm font-medium"
+                >
+                  - Delete Year
+                </button>
+                <button 
+                  onClick={addYear}
+                  className="px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors text-sm font-medium"
+                >
+                  + Add Year
+                </button>
+              </div>
+            </div>
+
+            {/* Сетка инпутов */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {flows.map((flow, index) => (
+                <div key={index}>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    {index === 0 ? 'Start (Investment)' : `Year ${index}`}
+                  </label>
+                  <input 
+                    type="number" 
+                    value={flow}
+                    onChange={(e) => handleFlowChange(index, e.target.value)}
+                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${index === 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </main>
+
+        {/* Карточки с результатами */}
+        {results && (
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Net present value (NPV)</h3>
+              <p className={`text-3xl font-bold ${results.npv >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {results.npv.toLocaleString('ru-RU')} ₸
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Profitability index (PI)</h3>
+              <p className="text-3xl font-bold text-blue-600">
+                {results.pi} <span className="text-lg font-normal text-gray-500">{results.pi > 1 ? '(The project is profitable)' : '(Unprofitable)'}</span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* График */}
+        {results && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-96">
+            <h3 className="text-lg font-bold mb-4">Payback schedule</h3>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={results.chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="year" />
+                <YAxis />
+                <Tooltip formatter={(value: number | undefined) => value !== undefined ? `${value.toLocaleString('ru-RU')} ₸` : '0 ₸'} />
+                <ReferenceLine y={0} stroke="red" strokeDasharray="3 3" />
+                <Line type="monotone" dataKey="cumulative" stroke="#2563eb" strokeWidth={3} dot={{ r: 6 }} name="Накопленный итог" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+        
+      </div>
     </div>
   );
 }
